@@ -10,7 +10,6 @@ using System.Threading;
 using System.Windows.Input;
 
 namespace GMS_Gitlab_Project_Manager {
-
     public partial class MainWindow : Window {
         private Dictionary<int, ProjectGroups> allProjectGroups = new Dictionary<int, ProjectGroups>(); // Holds all project groups
         private Dictionary<string, Project> allProjects = new Dictionary<string, Project>(); // Holds all projects
@@ -257,14 +256,18 @@ namespace GMS_Gitlab_Project_Manager {
                 lstProjectGroups.Items.Add("All");
                 this.isEditing = false;
 
-                // Load all project groups
-                foreach (int key in this.allProjectGroups.Keys) {
-                     isEditing = true; // Prevents the event from being triggered
-                     lstProjectGroups.Items.Add(this.allProjectGroups[key].projectGroupName);
-                     this.isEditing = false;
-                     
-                     // Load all projects for the specified projec group id
-                     loadProjectsByGroupID(key);
+                // Get all project group names in an array so we can sort it
+                string[] projectGroupNames = projectGroupNames = (from entry in this.allProjectGroups select entry.Value.projectGroupName).ToArray();
+                
+                Array.Sort(projectGroupNames);
+
+                foreach (string item in projectGroupNames) {
+                    isEditing = true; // Prevents the event from being triggered
+                    lstProjectGroups.Items.Add(item);
+                    this.isEditing = false;
+
+                    // Load all projects for the specified project group id
+                    loadProjectsByGroupID(getProjectGroupID(item));
                 }
             });
 
