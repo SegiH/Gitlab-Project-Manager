@@ -264,6 +264,11 @@ namespace GMS_Gitlab_Project_Manager {
                 foreach (string item in projectGroupNames) {
                     isEditing = true; // Prevents the event from being triggered
                     lstProjectGroups.Items.Add(item);
+
+                    if (item.Equals("Verj IO projects")) {
+                        lstProjectGroups.SelectedItem = item;
+                    }
+
                     this.isEditing = false;
 
                     // Load all projects for the specified project group id
