@@ -1,0 +1,36 @@
+C:\Users\Segi\Desktop\GMS Gitlab Project Manager\GMS Gitlab Project Manager\bin\Debug\GMS Gitlab Project Manager.exe.config
+C:\Users\Segi\Desktop\GMS Gitlab Project Manager\GMS Gitlab Project Manager\bin\Debug\GMS Gitlab Project Manager.exe
+C:\Users\Segi\Desktop\GMS Gitlab Project Manager\GMS Gitlab Project Manager\bin\Debug\GMS Gitlab Project Manager.pdb
+C:\Users\Segi\Desktop\GMS Gitlab Project Manager\GMS Gitlab Project Manager\obj\Debug\GMS Gitlab Project Manager.csprojResolveAssemblyReference.cache
+C:\Users\Segi\Desktop\GMS Gitlab Project Manager\GMS Gitlab Project Manager\obj\Debug\MainWindow.g.cs
+C:\Users\Segi\Desktop\GMS Gitlab Project Manager\GMS Gitlab Project Manager\obj\Debug\App.g.cs
+C:\Users\Segi\Desktop\GMS Gitlab Project Manager\GMS Gitlab Project Manager\obj\Debug\GMS Gitlab Project Manager_MarkupCompile.cache
+C:\Users\Segi\Desktop\GMS Gitlab Project Manager\GMS Gitlab Project Manager\obj\Debug\GMS Gitlab Project Manager_MarkupCompile.lref
+C:\Users\Segi\Desktop\GMS Gitlab Project Manager\GMS Gitlab Project Manager\obj\Debug\MainWindow.baml
+C:\Users\Segi\Desktop\GMS Gitlab Project Manager\GMS Gitlab Project Manager\obj\Debug\GMS Gitlab Project Manager.g.resources
+C:\Users\Segi\Desktop\GMS Gitlab Project Manager\GMS Gitlab Project Manager\obj\Debug\GMS_Gitlab_Project_Manager.Properties.Resources.resources
+C:\Users\Segi\Desktop\GMS Gitlab Project Manager\GMS Gitlab Project Manager\obj\Debug\GMS Gitlab Project Manager.csproj.GenerateResource.Cache
+C:\Users\Segi\Desktop\GMS Gitlab Project Manager\GMS Gitlab Project Manager\obj\Debug\GMS Gitlab Project Manager.exe
+C:\Users\Segi\Desktop\GMS Gitlab Project Manager\GMS Gitlab Project Manager\obj\Debug\GMS Gitlab Project Manager.pdb
+Z:\Visual Studio 2017\Projects\GMS Gitlab Project Manager\GMS Gitlab Project Manager\bin\Debug\GMS Gitlab Project Manager.exe.config
+Z:\Visual Studio 2017\Projects\GMS Gitlab Project Manager\GMS Gitlab Project Manager\bin\Debug\GMS Gitlab Project Manager.exe
+Z:\Visual Studio 2017\Projects\GMS Gitlab Project Manager\GMS Gitlab Project Manager\bin\Debug\GMS Gitlab Project Manager.pdb
+Z:\Visual Studio 2017\Projects\GMS Gitlab Project Manager\GMS Gitlab Project Manager\bin\Debug\RestSharp.dll
+Z:\Visual Studio 2017\Projects\GMS Gitlab Project Manager\GMS Gitlab Project Manager\bin\Debug\RestSharp.xml
+Z:\Visual Studio 2017\Projects\GMS Gitlab Project Manager\GMS Gitlab Project Manager\obj\Debug\MainWindow.g.cs
+Z:\Visual Studio 2017\Projects\GMS Gitlab Project Manager\GMS Gitlab Project Manager\obj\Debug\App.g.cs
+Z:\Visual Studio 2017\Projects\GMS Gitlab Project Manager\GMS Gitlab Project Manager\obj\Debug\GMS Gitlab Project Manager_MarkupCompile.cache
+Z:\Visual Studio 2017\Projects\GMS Gitlab Project Manager\GMS Gitlab Project Manager\obj\Debug\GMS Gitlab Project Manager_MarkupCompile.lref
+Z:\Visual Studio 2017\Projects\GMS Gitlab Project Manager\GMS Gitlab Project Manager\obj\Debug\MainWindow.baml
+Z:\Visual Studio 2017\Projects\GMS Gitlab Project Manager\GMS Gitlab Project Manager\obj\Debug\GMS Gitlab Project Manager.g.resources
+Z:\Visual Studio 2017\Projects\GMS Gitlab Project Manager\GMS Gitlab Project Manager\obj\Debug\GMS_Gitlab_Project_Manager.Properties.Resources.resources
+Z:\Visual Studio 2017\Projects\GMS Gitlab Project Manager\GMS Gitlab Project Manager\obj\Debug\GMS Gitlab Project Manager.csproj.GenerateResource.Cache
+Z:\Visual Studio 2017\Projects\GMS Gitlab Project Manager\GMS Gitlab Project Manager\obj\Debug\GMS Gitlab Project Manager.exe
+Z:\Visual Studio 2017\Projects\GMS Gitlab Project Manager\GMS Gitlab Project Manager\obj\Debug\GMS Gitlab Project Manager.pdb
+Z:\Visual Studio 2017\Projects\GMS Gitlab Project Manager\GMS Gitlab Project Manager\bin\Debug\Newtonsoft.Json.dll
+Z:\Visual Studio 2017\Projects\GMS Gitlab Project Manager\GMS Gitlab Project Manager\bin\Debug\System.Net.Http.Formatting.dll
+Z:\Visual Studio 2017\Projects\GMS Gitlab Project Manager\GMS Gitlab Project Manager\bin\Debug\Newtonsoft.Json.pdb
+Z:\Visual Studio 2017\Projects\GMS Gitlab Project Manager\GMS Gitlab Project Manager\bin\Debug\Newtonsoft.Json.xml
+Z:\Visual Studio 2017\Projects\GMS Gitlab Project Manager\GMS Gitlab Project Manager\bin\Debug\System.Net.Http.Formatting.xml
+Z:\Visual Studio 2017\Projects\GMS Gitlab Project Manager\GMS Gitlab Project Manager\obj\Debug\GMS Gitlab Project Manager.csproj.CopyComplete
+Z:\Visual Studio 2017\Projects\GMS Gitlab Project Manager\GMS Gitlab Project Manager\obj\Debug\GMS Gitlab Project Manager.csprojAssemblyReference.cache
