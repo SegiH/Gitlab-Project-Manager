@@ -26,6 +26,7 @@ namespace GMS_Gitlab_Project_Manager {
             this.allProjectGroups.Add(7, new ProjectGroups("Angular projects", "http://git.gms4sbc.com/angular-projects/", (Environment.GetEnvironmentVariable("USERPROFILE") != "" ? Environment.GetEnvironmentVariable("USERPROFILE") + "\\Desktop" : "C:\\")));
             this.allProjectGroups.Add(4,new ProjectGroups("Verj IO projects", "http://git.gms4sbc.com/verj-io-projects/", "C:\\VerjIOData\\apps\\ufs\\workspace\\"));
             this.allProjectGroups.Add(8, new ProjectGroups("C# Projects", "http://git.gms4sbc.com/c-projects/", (Environment.GetEnvironmentVariable("USERPROFILE") != "" ? Environment.GetEnvironmentVariable("USERPROFILE") + "\\Desktop" : "C:\\")));
+            this.allProjectGroups.Add(9, new ProjectGroups("VBA Projects", "http://git.gms4sbc.com/vba-projects/", (Environment.GetEnvironmentVariable("USERPROFILE") != "" ? Environment.GetEnvironmentVariable("USERPROFILE") + "\\Desktop" : "C:\\")));
             //
             // Prevents Shared checkbox change event from being triggered
             isLoading = true;
