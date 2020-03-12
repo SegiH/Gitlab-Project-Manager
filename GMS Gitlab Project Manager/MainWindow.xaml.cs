@@ -4,10 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Windows;
-using System.Threading;
 using System.Windows.Input;
+
+// see if separate thread is needed
 
 namespace GMS_Gitlab_Project_Manager {
     public partial class MainWindow : Window {
@@ -15,18 +17,20 @@ namespace GMS_Gitlab_Project_Manager {
         private Dictionary<string, Project> allProjects = new Dictionary<string, Project>(); // Holds all projects
         private bool isLoading=false; // flag that is used to prevent the Shared checkbox change event from being triggered
         bool isEditing = false;
-        Thread loadProjectThread;
+        // Thread loadProjectThread;
+        const string gitURL = "http://git.gms4sbc.com";
+        const string privateToken = "bM262ELkCaAqz6TrWXMe";
 
         // Constructor
         public MainWindow() {
             InitializeComponent();
 
-            // Init the project groups - This can't be automated since I have to specify the path where to save the project for each project group
-            this.allProjectGroups.Add(7, new ProjectGroups("Angular projects", "http://git.gms4sbc.com/angular-projects/", (Environment.GetEnvironmentVariable("USERPROFILE") != "" ? Environment.GetEnvironmentVariable("USERPROFILE") + "\\Desktop" : "C:\\")));
-            this.allProjectGroups.Add(4,new ProjectGroups("Verj IO projects", "http://git.gms4sbc.com/verj-io-projects/", "C:\\VerjIOData\\apps\\ufs\\workspace\\"));
-            this.allProjectGroups.Add(8, new ProjectGroups("C# Projects", "http://git.gms4sbc.com/c-projects/", (Environment.GetEnvironmentVariable("USERPROFILE") != "" ? Environment.GetEnvironmentVariable("USERPROFILE") + "\\Desktop" : "C:\\")));
-            this.allProjectGroups.Add(9, new ProjectGroups("VBA Projects", "http://git.gms4sbc.com/vba-projects/", (Environment.GetEnvironmentVariable("USERPROFILE") != "" ? Environment.GetEnvironmentVariable("USERPROFILE") + "\\Desktop" : "C:\\")));
-            //
+            lstProjectGroupSources.Items.Add("Gitlab Server");
+            lstProjectGroupSources.Items.Add("Local DB");
+
+            // Set status of Project Group Sources based on saved state from previous session
+            lstProjectGroupSources.SelectedItem = Properties.Settings.Default.DefaultProjectGroupSource;
+
             // Prevents Shared checkbox change event from being triggered
             isLoading = true;
 
@@ -35,6 +39,16 @@ namespace GMS_Gitlab_Project_Manager {
 
             // Set status of Close Automatically checkbox based on saved state from previous session
             chkCloseAutomatically.IsChecked = Properties.Settings.Default.CloseAutomatically;
+
+            // Load Project group source - Setting this triggers LstProjectGroupSource_SelectionChanged() which loads the project groups and projects
+            if (Properties.Settings.Default.DefaultProjectGroupSource != 0) {
+                lstProjectGroupSources.SelectedIndex = Properties.Settings.Default.DefaultProjectGroupSource;
+
+                lstProjectGroups.SelectedIndex = Properties.Settings.Default.DefaultProjectGroup;
+
+                if (lstProjectGroups.SelectedIndex == -1 && lstProjectGroups.Items.Count > 0)
+                    lstProjectGroups.SelectedItem = "Verj IO Projects";
+            }
 
             this.isLoading = false;
 
@@ -79,15 +93,27 @@ namespace GMS_Gitlab_Project_Manager {
                 System.Windows.Application.Current.Shutdown();
         }
 
-        // Enable or disable go button based on whether at least 1 project is selected
-        private void ChkIncludeSharedProject_CheckedChanged(object sender, EventArgs e) {
-            enableDisableGoButton();
+        // Populate the project groups listbox
+        private void buildProjectGroupListBox() {
+            // this.Dispatcher.Invoke(() => is Needed to access lstProjectGroups because this method is called from a separate thread
+            this.Dispatcher.Invoke(() => {
+                isEditing = true;  // Prevents the selected event from being triggered
 
-            // Whenever the shared checkbox is checked or unchecked, save this preference so it can be used when loading the application
-            if (this.isLoading == false) {
-                 Properties.Settings.Default.SharedIsChecked = (bool)chkIncludeSharedProject.IsChecked;
-                 Properties.Settings.Default.Save();
-            }           
+                lstProjectGroups.Items.Clear();
+
+                lstProjectGroups.Items.Add("All"); // Add "All" to project groups dropdown
+
+                // Get all project group names in an array so we can sort it
+                string[] projectGroupNames = projectGroupNames = (from entry in this.allProjectGroups select entry.Value.projectGroupName).ToArray();
+
+                Array.Sort(projectGroupNames);
+
+                foreach (string item in projectGroupNames) {
+                    lstProjectGroups.Items.Add(item);
+                }
+
+                this.isEditing = false;
+            });
         }
 
         // Enable or disable button based on whether at least 1 project is selected
@@ -99,42 +125,20 @@ namespace GMS_Gitlab_Project_Manager {
             }
         }
 
-        // When you press a key in the listbox, jump to the first project that begins with that letter
-        private void LstProjects_KeyPressed(object sender, KeyEventArgs e) {
-            // Get first matching item or null if there's no match
-            var firstItem = (from entry in this.allProjects where entry.Key.ToString().ToLower().StartsWith(e.Key.ToString().ToLower()) select entry.Key).FirstOrDefault();
-
-            // Only set selected if a match was found. Otherwise stay on the previously selected item
-            if (firstItem != null)
-                lstProjects.SelectedItem = firstItem;
-        }
-
         // Enable or disable go button based on whether at least 1 project is selected
-        private void LstProjects_Selected(object sender, RoutedEventArgs e) {
+        private void ChkIncludeSharedProject_CheckedChanged(object sender, EventArgs e) {
             enableDisableGoButton();
-        }
 
-        // Project group changed
-        private void LstProjectGroups_SelectionChanged(object sender, RoutedEventArgs e) {
-            if (isEditing)
-                return;
-
-            loadListBoxItemsForProjectGroupID();
-        }
-
-        private void Window_Loaded(object sender, RoutedEventArgs e) {
-            // Start a new thread to Load all projects so the UI doesn't lock up while its loading
-            this.loadProjectThread = new Thread(new ThreadStart(this.loadProjects));
-            loadProjectThread.Start();
-        }
-
-        private void Window_Unloaded(object sender, RoutedEventArgs e) {
-            this.loadProjectThread.Abort();
+            // Whenever the shared checkbox is checked or unchecked, save this preference so it can be used when loading the application
+            if (this.isLoading == false) {
+                 Properties.Settings.Default.SharedIsChecked = (bool)chkIncludeSharedProject.IsChecked;
+                 Properties.Settings.Default.Save();
+            }           
         }
 
         // Enable or disable the Go button based on whether Include Shared project is checked or at least 1 project is selected
         private void enableDisableGoButton() {
-            if (lstProjects.SelectedItems.Count == 0 && chkIncludeSharedProject.IsChecked == false)  {
+            if (lstProjects.SelectedItems.Count == 0 && chkIncludeSharedProject.IsChecked == false) {
                 BtnClone.IsEnabled = false;
             } else if (lstProjects.SelectedItems.Count > 0 || (lstProjects.SelectedItems.Count == 0 && chkIncludeSharedProject.IsChecked == true)) {
                 BtnClone.IsEnabled = true;
@@ -146,9 +150,9 @@ namespace GMS_Gitlab_Project_Manager {
             // The projects' group ID gives us access to the project group properties in this.allProjectGroups
             int projectGroupID = this.allProjects[fullProjectName].projectGroupID;
             string projectGroupURL = this.allProjectGroups[projectGroupID].baseURL;
-            string projectPath = this.allProjectGroups[projectGroupID].projectPath; 
+            string projectPath = this.allProjectGroups[projectGroupID].projectPath;
             string projectName = this.allProjectGroups[projectGroupID].projectGroupName;
-            
+
             // Validate required fields
             if (!Directory.Exists(projectPath)) {
                 MessageBox.Show("The " + projectName + "path " + projectPath + " does not exist");
@@ -181,7 +185,7 @@ namespace GMS_Gitlab_Project_Manager {
             Process proc = Process.Start(processStartInfo);
 
             proc.WaitForExit();
-            
+
             // If this app is not being run on IntranetDev we are done
             if (!System.Net.Dns.GetHostName().Equals("IntranetDEV"))
                 return true;
@@ -192,11 +196,11 @@ namespace GMS_Gitlab_Project_Manager {
                 String otherFilesCSV = "EmployeeRequisitions_NotApprovedByCLvlManager_Report.eb,Update_Kit_Planning_Update_Stats.eb";
 
                 foreach (string f in Directory.EnumerateFiles(projectPath + projectKey + "\\Scheduled_Tasks", "Report_*.eb")) {
-                     File.Delete(f);
+                    File.Delete(f);
 
-                     if (File.Exists(projectPath + projectKey + "\\Scheduled_Tasks" + f)) {
-                         failedDeletes = (!failedDeletes.Equals("") ? "," : "") + projectPath + projectKey + "\\Scheduled_Tasks" + f;
-                     }
+                    if (File.Exists(projectPath + projectKey + "\\Scheduled_Tasks" + f)) {
+                        failedDeletes = (!failedDeletes.Equals("") ? "," : "") + projectPath + projectKey + "\\Scheduled_Tasks" + f;
+                    }
                 }
 
                 string[] otherFiles = otherFilesCSV.Split(',');
@@ -224,22 +228,13 @@ namespace GMS_Gitlab_Project_Manager {
             return (from entry in this.allProjectGroups where entry.Value.projectGroupName.Equals(projectGroupName) select entry.Key).First();
         }
 
-        // Load all project in the selected project group
+        // Load all of the projects in the selected project group
         private void loadListBoxItemsForProjectGroupID() {
             this.Dispatcher.Invoke(() => {
                 lstProjects.Items.Clear();
 
-                if (lstProjectGroups.SelectedItem.ToString().Equals("All")) {
-                    foreach (string key in this.allProjects.Keys) {
-                        lstProjects.Items.Add(key);
-                    }
-                } else {
-                    // select all project names in the specified project group
-                    var projects = from entry in this.allProjects where entry.Value.projectGroupID == getProjectGroupID(lstProjectGroups.SelectedItem.ToString()) select entry.Key;
-
-                    foreach (string currProject in projects) {
-                        lstProjects.Items.Add(currProject);
-                    }
+                foreach (string currProject in (lstProjectGroups.SelectedItem.ToString().Equals("All") ? this.allProjects.Keys : (from entry in this.allProjects where entry.Value.projectGroupID == getProjectGroupID(lstProjectGroups.SelectedItem.ToString()) select entry.Key))) {
+                    lstProjects.Items.Add(currProject);
                 }
 
                 // Sort all items
@@ -247,46 +242,13 @@ namespace GMS_Gitlab_Project_Manager {
             });
         }
 
-        // Loads all projects groups and all projects for the default project group
-        private void loadProjects() {
-            // this.Dispatcher.Invoke(() => is Needed to access lstProjectGroups because this method is called from a separate thread
-            this.Dispatcher.Invoke(() => {
-                // Add "All" to project groups dropdown
-                isEditing = true;
-                lstProjectGroups.Items.Add("All");
-                this.isEditing = false;
-
-                // Get all project group names in an array so we can sort it
-                string[] projectGroupNames = projectGroupNames = (from entry in this.allProjectGroups select entry.Value.projectGroupName).ToArray();
-                
-                Array.Sort(projectGroupNames);
-
-                foreach (string item in projectGroupNames) {
-                    isEditing = true; // Prevents the event from being triggered
-                    lstProjectGroups.Items.Add(item);
-
-                    if (item.Equals("Verj IO projects")) {
-                        lstProjectGroups.SelectedItem = item;
-                    }
-
-                    this.isEditing = false;
-
-                    // Load all projects for the specified project group id
-                    loadProjectsByGroupID(getProjectGroupID(item));
-                }
-            });
-
-            // Since the project group dropdown has a preselected value, display all projects for the selected project
-            this.loadListBoxItemsForProjectGroupID();
-        }
-
-        // Fetch all projects in the given project group
-        private void loadProjectsByGroupID(int projectGroupID)  {
-            string RESTURL = String.Concat("http://git.gms4sbc.com/api/v4/groups/", projectGroupID, "/projects?private_token=bM262ELkCaAqz6TrWXMe&per_page=9999&simple=true&sort=asc");
-
+        // Fetch all projects in the given project group from the REST resource
+        private void loadProjectsByGroupID(int projectGroupID) {
+            string RESTURL = String.Concat(gitURL, "/api/v4/groups/", projectGroupID, "/projects?private_token=" + privateToken + "&per_page=9999&simple=true&sort=asc");
+            
             IRestResponse response;
 
-            var client = new RestClient(RESTURL);            
+            var client = new RestClient(RESTURL);
 
             response = client.Execute(new RestRequest());
 
@@ -303,80 +265,162 @@ namespace GMS_Gitlab_Project_Manager {
             JArray allProjects = JArray.Parse(response.Content);
 
             // Loop through each project returned by the response and add to the dictionary
-            for (int counter=0;counter<allProjects.Count;counter++) {
+            for (int counter = 0; counter < allProjects.Count; counter++) {
                 this.allProjects.Add(allProjects[counter]["name"].ToString(), new Project(allProjects[counter]["path"].ToString(), projectGroupID));
             }
         }
-    }
 
-    /*class Encrypt {
-        // This size of the IV (in bytes) must = (keysize / 8).  Default keysize is 256, so the IV must be
-        // 32 bytes long.  Using a 16 character string here gives us 32 bytes when converted to a byte array.
-        private const string initVector = "pemgail9uzpgzl88";
-        // This constant is used to determine the keysize of the encryption algorithm
-        private const int keysize = 256;
+        // Read project groups from the DB
+        private void loadProjectGroupsFromDB() {
+            String sql = "SELECT * FROM GitlabProjectManagerProjectGroups ORDER BY GitlabProjectManagerProjectGroupName";
+            SqlCommand command;
+            SqlDataReader dataReader;
+            SqlConnection sqlConn;
+            string path = "";
 
-        //Encrypt
-        public static string EncryptString(string plainText, string passPhrase) {
-            byte[] initVectorBytes = Encoding.UTF8.GetBytes(initVector);
-            byte[] plainTextBytes = Encoding.UTF8.GetBytes(plainText);
-            PasswordDeriveBytes password = new PasswordDeriveBytes(passPhrase, null);
-            byte[] keyBytes = password.GetBytes(keysize / 8);
-            RijndaelManaged symmetricKey = new RijndaelManaged() {
-                Mode = CipherMode.CBC
-            };
-            ICryptoTransform encryptor = symmetricKey.CreateEncryptor(keyBytes, initVectorBytes);
-            MemoryStream memoryStream = new MemoryStream();
-            CryptoStream cryptoStream = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write);
-            cryptoStream.Write(plainTextBytes, 0, plainTextBytes.Length);
-            cryptoStream.FlushFinalBlock();
-            byte[] cipherTextBytes = memoryStream.ToArray();
-            memoryStream.Close();
-            cryptoStream.Close();
-            return Convert.ToBase64String(cipherTextBytes);
+            const String salt = "GFDG$#%#$^&*&^^DGFDGDFG";
+
+            String connectionString = @"DATABASE = Intranet; SERVER = GENESIS,1433;;User ID=" + Encrypt.DecryptString("0mews0Nyy6/MJzO5Gznf3w==", salt) + ";Password=" + Encrypt.DecryptString("Rj8i7Bfij0D8O9PsRfbLTw==", salt);
+
+            // Get connection based on the connection string
+            sqlConn = new SqlConnection(connectionString);
+
+            sqlConn.Open();
+
+            command = new SqlCommand(sql, sqlConn);
+
+            dataReader = command.ExecuteReader();
+
+            this.allProjects.Clear();
+            this.allProjectGroups.Clear();
+            this.lstProjects.Items.Clear();
+
+            // Read the result
+            while (dataReader.Read()) {
+                path = dataReader.GetValue(3).ToString();
+
+                path = path.Replace("%USERPROFILE%", (Environment.GetEnvironmentVariable("USERPROFILE") != "" ? Environment.GetEnvironmentVariable("USERPROFILE") : "C:\\"));
+
+                this.loadProjectsByGroupID(dataReader.GetInt32(0));
+
+                this.allProjectGroups.Add(dataReader.GetInt32(0), new ProjectGroups(dataReader.GetValue(1).ToString(), dataReader.GetValue(2).ToString(), path));
+            }
+
+            sqlConn.Close();
+
+            this.buildProjectGroupListBox();
         }
 
-        //Decrypt
-        public static string DecryptString(string cipherText, string passPhrase) {
-            byte[] initVectorBytes = Encoding.UTF8.GetBytes(initVector);
-            byte[] cipherTextBytes = Convert.FromBase64String(cipherText);
-            PasswordDeriveBytes password = new PasswordDeriveBytes(passPhrase, null);
-            byte[] keyBytes = password.GetBytes(keysize / 8);
-            RijndaelManaged symmetricKey = new RijndaelManaged()
-            {
-                Mode = CipherMode.CBC
-            };
-            ICryptoTransform decryptor = symmetricKey.CreateDecryptor(keyBytes, initVectorBytes);
-            MemoryStream memoryStream = new MemoryStream(cipherTextBytes);
-            CryptoStream cryptoStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read);
-            byte[] plainTextBytes = new byte[cipherTextBytes.Length];
-            int decryptedByteCount = cryptoStream.Read(plainTextBytes, 0, plainTextBytes.Length);
-            memoryStream.Close();
-            cryptoStream.Close();
-            return Encoding.UTF8.GetString(plainTextBytes, 0, decryptedByteCount);
+        // Load project group names from REST resource
+        private void loadProjectGroupsFromREST() {
+            string RESTURL = String.Concat(gitURL, "/api/v4/groups/", "?private_token=" + privateToken);
+
+            IRestResponse response;
+
+            var client = new RestClient(RESTURL);
+
+            response = client.Execute(new RestRequest());
+
+            if (response.Content.Equals("")) {
+                MessageBox.Show("The git server at " + RESTURL + " did not return any projects and may not available");
+
+                this.Dispatcher.Invoke(() => {
+                    System.Windows.Application.Current.Shutdown();
+                });
+
+                return;
+            }
+
+            JArray allProjectGroups = JArray.Parse(response.Content);
+
+            this.allProjects.Clear();
+            this.allProjectGroups.Clear();
+            this.lstProjects.Items.Clear();
+
+            // Loop through each project returned by the response and add to the dictionary
+            for (int counter = 0; counter < allProjectGroups.Count; counter++) {
+                int id = Int32.Parse(allProjectGroups[counter]["id"].ToString().Replace("{", "").Replace("}", ""));
+                string name = allProjectGroups[counter]["name"].ToString().Replace("{", "").Replace("}", "");
+                string url= allProjectGroups[counter]["web_url"].ToString().Replace("{", "").Replace("}", "");
+                string path = (name.Equals("Verj IO Projects") ? "C:\\VerjIOData\apps\\ufs\\workspace\\" : (Environment.GetEnvironmentVariable("USERPROFILE") != "" ? Environment.GetEnvironmentVariable("USERPROFILE") + "\\Desktop" : "C:\\"));
+
+                this.loadProjectsByGroupID(id);
+                this.allProjectGroups.Add(id, new ProjectGroups(name, url, path));
+            }
+
+            this.buildProjectGroupListBox();
         }
-    }*/
 
-    class Project {
-        public string projectShortName { get; set; }
+        // Event when the project group selection changes
+        private void LstProjectGroupSource_SelectionChanged(object sender, RoutedEventArgs e) {
+            if (this.isLoading == false && lstProjectGroupSources.SelectedIndex != -1) {
+                Properties.Settings.Default.DefaultProjectGroupSource = lstProjectGroupSources.SelectedIndex;
+                Properties.Settings.Default.Save();
+            }
 
-        public int projectGroupID { get; set; }
-
-        public Project(string _projectShortName, int _projectGroupID) {
-            this.projectShortName = _projectShortName;
-            this.projectGroupID = _projectGroupID;
+            switch (lstProjectGroupSources.SelectedIndex) {
+                case 0:  // Load from REST resource
+                    loadProjectGroupsFromREST();
+                    break;
+                case 1: // Load from DB
+                    loadProjectGroupsFromDB();
+                    break;
+            }
         }
-    }
 
-    class ProjectGroups {
-        public string projectGroupName { get; set; }
-        public string baseURL { get; set; }
-        public string projectPath { get; set; }
+        // When you press a key in the listbox, jump to the first project that begins with that letter
+        private void LstProjects_KeyPressed(object sender, KeyEventArgs e) {
+            // Get first matching item or null if there's no match
+            var firstItem = (from entry in this.allProjects where entry.Key.ToString().ToLower().StartsWith(e.Key.ToString().ToLower()) select entry.Key).FirstOrDefault();
 
-        public ProjectGroups(string _projectGroupName, string _baseURL, string _projectPath) {
-            this.projectGroupName = _projectGroupName;
-            this.baseURL = _baseURL;
-            this.projectPath = _projectPath;
+            // Only set selected if a match was found. Otherwise stay on the previously selected item
+            if (firstItem != null)
+                lstProjects.SelectedItem = firstItem;
         }
-    }
+
+        // Enable or disable go button based on whether at least 1 project is selected
+        private void LstProjects_Selected(object sender, RoutedEventArgs e) {
+            enableDisableGoButton();
+        }
+
+        // Project group changed
+        private void LstProjectGroups_SelectionChanged(object sender, RoutedEventArgs e) {
+            if (isEditing)
+                return;
+
+            if (lstProjectGroups.SelectedIndex != -1) {
+                Properties.Settings.Default.DefaultProjectGroup = lstProjectGroups.SelectedIndex;
+                Properties.Settings.Default.Save();
+            }
+
+            if (lstProjectGroups.SelectedIndex != -1) {                
+                this.loadListBoxItemsForProjectGroupID();
+            }
+            
+        }
+    }    
 }
+
+// Loads all projects groups and all projects for the default project group
+/*private void loadProjects() {
+    // Load the projects for the selected project group if a project group is selected
+    this.Dispatcher.Invoke(() => {
+        if (lstProjectGroups.SelectedIndex == -1 && lstProjectGroups.Items.Count > 0)
+            lstProjectGroups.SelectedItem = "Verj IO projects";
+
+        if (lstProjectGroups.SelectedIndex != -1) {
+            this.loadListBoxItemsForProjectGroupID();
+        }
+
+    });
+
+            private void Window_Loaded(object sender, RoutedEventArgs e) {
+            // Start a new thread to Load all projects so the UI doesn't lock up while its loading
+            //this.loadProjectThread = new Thread(new ThreadStart(this.loadProjects));
+            //loadProjectThread.Start();
+        }
+
+        private void Window_Unloaded(object sender, RoutedEventArgs e) {
+            //this.loadProjectThread.Abort();
+        }    
+}*/
