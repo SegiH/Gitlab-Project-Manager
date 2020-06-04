@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GMS_Gitlab_Project_Manager {
+namespace GMSGitlabProjectManager {
     class ProjectGroups {
         public string projectGroupName { get; set; }
         public string baseURL { get; set; }

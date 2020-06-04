@@ -1,9 +1,9 @@
-﻿<Window x:Class="GMS_Gitlab_Project_Manager.MainWindow"
+﻿<Window x:Class="GMSGitlabProjectManager.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:GMS_Gitlab_Project_Manager"
+        xmlns:local="clr-namespace:GMSGitlabProjectManager"
         mc:Ignorable="d"
         Title="GMS Gitlab Project Manager" Height="600" Width="552">
     <Grid Height="750" MinHeight="750">
@@ -24,6 +24,7 @@
         <Label Content="Filter by project group&#xA;" HorizontalAlignment="Left" Margin="21,72,0,0" VerticalAlignment="Top" Height="26"/>
         <Label Content="Get project groups from" HorizontalAlignment="Left" Margin="21,10,0,0" VerticalAlignment="Top" Height="26"/>
         <ComboBox x:Name="lstProjectGroupSources" HorizontalAlignment="Left" Margin="164,14,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="LstProjectGroupSource_SelectionChanged" SelectedIndex="2"/>
+        <CheckBox x:Name="chkWarnSharedProjectExists" Checked="ChkWarnSharedProjectExists_CheckedChanged" Unchecked="ChkWarnSharedProjectExists_CheckedChanged" Content="Warn me if Shared project already exists" HorizontalAlignment="Left" Margin="179,121,0,0" VerticalAlignment="Top" Width="237" />
 
     </Grid>
 </Window>

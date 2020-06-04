@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace GMS_Gitlab_Project_Manager.Properties {
+namespace GMSGitlabProjectManager.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -68,6 +68,18 @@ namespace GMS_Gitlab_Project_Manager.Properties {
             }
             set {
                 this["DefaultProjectGroup"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool WarnSharedProjectExists {
+            get {
+                return ((bool)(this["WarnSharedProjectExists"]));
+            }
+            set {
+                this["WarnSharedProjectExists"] = value;
             }
         }
     }
