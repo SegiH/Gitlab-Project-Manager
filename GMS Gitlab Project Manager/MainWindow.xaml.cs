@@ -2,16 +2,15 @@
 using RestSharp;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.IO;
 using System.Data.SqlClient;
 using System.Diagnostics;
-using System.Windows;
-using System.Windows.Input;
 using System.Globalization;
+using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Configuration;
+using System.Windows;
+using System.Windows.Input;
 
 // see if separate thread is needed
 
@@ -19,14 +18,14 @@ namespace GMSGitlabProjectManager {
     public partial class MainWindow : Window { //, IDisposable {
         private readonly Dictionary<int, ProjectGroups> allProjectGroups = new Dictionary<int, ProjectGroups>(); // Holds all project groups
         private readonly Dictionary<string, Project> allProjects = new Dictionary<string, Project>(); // Holds all projects
-        private readonly bool isLoading=false; // flag that is used to prevent the Shared checkbox change event from being triggered
+        private readonly bool isLoading = false; // flag that is used to prevent the Shared checkbox change event from being triggered
         bool isEditing = false;
         const string gitURL = "http://git.gms4sbc.com";
         const string privateToken = "bM262ELkCaAqz6TrWXMe";
 
-        string publickey = "Ek7Sp-l2";
-        string secretkey = "G$Hk%6l2";
-        string privatekey = "G$Hk%6l2";
+        const string publickey = "Ek7Sp-l2";
+        const string secretkey = "G$Hk%6l2";
+        const string privatekey = "G$Hk%6l2";
 
         // Constructor
         public MainWindow() {
@@ -78,7 +77,7 @@ namespace GMSGitlabProjectManager {
             }
 
             // Since you can select multiple projects, loop through each selected item in the listbox and fetch that project
-            for (int projCounter = 0; projCounter<lstProjects.SelectedItems.Count;projCounter++) {                
+            for (int projCounter = 0; projCounter < lstProjects.SelectedItems.Count; projCounter++) {
                 if (lstProjects.SelectedItems[projCounter].ToString().Equals("Shared", StringComparison.CurrentCulture)) // If Shared was selected in the listbox, don't attempt to fetch it a 2nd time if the Shared checkbox is checked
                     sharedFetched = true;
 
@@ -151,12 +150,12 @@ namespace GMSGitlabProjectManager {
 
             // Whenever the shared checkbox is checked or unchecked, save this preference so it can be used when loading the application
             if (this.isLoading == false) {
-                 Properties.Settings.Default.SharedIsChecked = (bool)chkIncludeSharedProject.IsChecked;
-                 Properties.Settings.Default.Save();
-            }           
+                Properties.Settings.Default.SharedIsChecked = (bool)chkIncludeSharedProject.IsChecked;
+                Properties.Settings.Default.Save();
+            }
         }
 
-        public string Decrypt(string textToDecrypt) {
+        static public string Decrypt(string textToDecrypt) {
             MemoryStream ms = null;
             CryptoStream cs = null;
 
@@ -204,7 +203,7 @@ namespace GMSGitlabProjectManager {
             }
         }
 
-        public string Encrypt(string textToEncrypt) {
+        static public string Encrypt(string textToEncrypt) {
             try {
                 string ToReturn = "";
 
@@ -335,7 +334,7 @@ namespace GMSGitlabProjectManager {
         // Fetch all projects in the given project group from the REST resource
         private void LoadProjectsByGroupID(int projectGroupID) {
             string RESTURL = String.Concat(gitURL, "/api/v4/groups/", projectGroupID, "/projects?private_token=" + privateToken + "&per_page=9999&simple=true&sort=asc");
-            
+
             IRestResponse response;
 
             var client = new RestClient(RESTURL);
@@ -434,7 +433,7 @@ namespace GMSGitlabProjectManager {
             for (int counter = 0; counter < allProjectGroups.Count; counter++) {
                 int id = Int32.Parse(allProjectGroups[counter]["id"].ToString().Replace("{", "").Replace("}", ""), CultureInfo.CurrentCulture);
                 string name = allProjectGroups[counter]["name"].ToString().Replace("{", "").Replace("}", "");
-                string url= allProjectGroups[counter]["web_url"].ToString().Replace("{", "").Replace("}", "");
+                string url = allProjectGroups[counter]["web_url"].ToString().Replace("{", "").Replace("}", "");
                 string path = (name.Equals("Verj IO Projects", StringComparison.CurrentCulture) ? "C:\\VerjIOData\apps\\ufs\\workspace\\" : (Environment.GetEnvironmentVariable("USERPROFILE").Length > 0 ? Environment.GetEnvironmentVariable("USERPROFILE") + "\\Desktop" : "C:\\"));
 
                 this.LoadProjectsByGroupID(id);
@@ -496,10 +495,10 @@ namespace GMSGitlabProjectManager {
                 Properties.Settings.Default.Save();
             }
 
-            if (lstProjectGroups.SelectedIndex != -1) {                
+            if (lstProjectGroups.SelectedIndex != -1) {
                 this.LoadListBoxItemsForProjectGroupID();
             }
-            
+
         }
-    }    
+    }
 }

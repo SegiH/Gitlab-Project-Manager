@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GMSGitlabProjectManager {
+﻿namespace GMSGitlabProjectManager {
     class ProjectGroups {
         public string projectGroupName { get; set; }
         public string baseURL { get; set; }
