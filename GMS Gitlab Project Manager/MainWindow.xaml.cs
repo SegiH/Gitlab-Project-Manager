@@ -50,7 +50,7 @@ namespace GMSGitlabProjectManager {
             chkCloseAutomatically.IsChecked = Properties.Settings.Default.CloseAutomatically;
 
             // Load Project group source - Setting this triggers LstProjectGroupSource_SelectionChanged() which loads the project groups and projects
-            if (Properties.Settings.Default.DefaultProjectGroupSource != 0) {
+            if (Properties.Settings.Default.DefaultProjectGroupSource != -1) {
                 lstProjectGroupSources.SelectedIndex = Properties.Settings.Default.DefaultProjectGroupSource;
 
                 lstProjectGroups.SelectedIndex = Properties.Settings.Default.DefaultProjectGroup;
