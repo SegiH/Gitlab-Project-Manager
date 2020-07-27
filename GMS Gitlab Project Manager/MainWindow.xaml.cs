@@ -439,7 +439,7 @@ namespace GMSGitlabProjectManager {
                 int id = Int32.Parse(allProjectGroups[counter]["id"].ToString().Replace("{", "").Replace("}", ""), CultureInfo.CurrentCulture);
                 string name = allProjectGroups[counter]["name"].ToString().Replace("{", "").Replace("}", "");
                 string url = allProjectGroups[counter]["web_url"].ToString().Replace("{", "").Replace("}", "");
-                string path = (name.Equals("Verj IO Projects", StringComparison.CurrentCulture) ? "C:\\VerjIOData\apps\\ufs\\workspace\\" : (Environment.GetEnvironmentVariable("USERPROFILE").Length > 0 ? Environment.GetEnvironmentVariable("USERPROFILE") + "\\Desktop" : "C:\\"));
+                string path = (name.Equals("Verj IO Projects", StringComparison.CurrentCulture) ? "C:\\VerjIOData\\apps\\ufs\\workspace\\" : (Environment.GetEnvironmentVariable("USERPROFILE").Length > 0 ? Environment.GetEnvironmentVariable("USERPROFILE") + "\\Desktop" : "C:\\"));
 
                 this.LoadProjectsByGroupID(id);
                 this.allProjectGroups.Add(id, new ProjectGroups(name, url, path));
