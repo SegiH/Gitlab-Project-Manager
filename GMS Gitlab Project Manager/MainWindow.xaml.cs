@@ -146,6 +146,11 @@ namespace GMSGitlabProjectManager {
 
         // Enable or disable go button based on whether at least 1 project is selected
         private void ChkIncludeSharedProject_CheckedChanged(object sender, EventArgs e) {
+            if (chkIncludeSharedProject.IsChecked == false)
+                chkWarnSharedProjectExists.IsEnabled = false;
+            else
+                chkWarnSharedProjectExists.IsEnabled = true;
+
             EnableDisableGoButton();
 
             // Whenever the shared checkbox is checked or unchecked, save this preference so it can be used when loading the application
