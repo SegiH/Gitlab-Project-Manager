@@ -375,7 +375,7 @@ namespace GMSGitlabProjectManager {
             const string info1 = "d0KD29IcCrVvLhDyQYt95w==";
             const string info2 = "GO2UJpkxXag6vNnVqv2CXA==";
 
-            String connectionString = @"DATABASE = Intranet; SERVER = GENESIS,1433;;User ID=" + Decrypt(info1) + ";Password=" + Decrypt(info2);
+            String connectionString = @"DATABASE = Intranet; SERVER = INTRANETDB,1433;;User ID=" + Decrypt(info1) + ";Password=" + Decrypt(info2);
 
             // Get connection based on the connection string
             sqlConn = new SqlConnection(connectionString);
